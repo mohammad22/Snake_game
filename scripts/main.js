@@ -181,23 +181,22 @@ function Shift_Snake (Snake, m  = Snake.cells[0].u){
 function Reset_Ball(){
     var cells = Snake.cells;
     var ball = {center:[0, 0], radius: h};
-    var x, y;
+    var i, x, y;
     var ball_ok = false; //state of the new random ball up to now
+    var R = ball.radius;
+    var cw = canvas.width;
+    var ch = canvas.height;
     // concerning different levels later:
     // the cells variable can be initialized before the following code
     // to include both cells of the snake and walls for any levels
     while (ball_ok === false){
-        x = Math.random() * canvas.width;
-        y = Math.random() * canvas.height;    
+        x = Math.random() * cw;
+        y = Math.random() * ch;    
         ball.center = mod_canvas([x, y]);
-        var R = ball.radius;
-        var cw = canvas.width;
-        var ch = canvas.height;
         if (ball.center[0] < R) {ball.center[0] += R;}
         if (ball.center[1] < R) {ball.center[1] += R;}
         if (ball.center[0] > cw - R) { ball.center[0] += R; }
         if (ball.center[1] > ch - R) { ball.center[0] += R; }
-        var i;
         for (i = 0; i < cells.length; i++){
             if (ball_hit_cell(ball, cells[i])) { 
                 ball_ok = false; 
