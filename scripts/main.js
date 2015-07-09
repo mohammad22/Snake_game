@@ -277,11 +277,7 @@ function snake_handler(){
     }
 }
 
-// The main entrance function 
-function gamehandler(){
-    Snakehandler = window.setInterval(snake_handler, stime);
-} 
-
+// events 
 function user_event_handler (event){
     var x = event.which || event.keycode;
     if (x === up_key) {Snake.d = [0, -1];}
@@ -293,5 +289,11 @@ function user_event_handler (event){
 }
 window.addEventListener("keydown", user_event_handler);
 
+// The main entrance function 
+function gamehandler(){
+    Snakehandler = window.setInterval(snake_handler, stime);
+} 
+
+// start
 Draw_new_Ball();
 gamehandler();
