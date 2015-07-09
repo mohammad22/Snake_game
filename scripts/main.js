@@ -61,8 +61,8 @@ Wall = {
 function mod_canvas(a){
     var x_mod = a[0] % canvas.width;
     var y_mod = a[1] % canvas.height;
-    if (x_mod <= 0){x_mod = x_mod + canvas.width;}
-    if (y_mod <= 0) {y_mod = y_mod + canvas.height; }
+    if (x_mod <= 0) {x_mod += canvas.width;}
+    if (y_mod <= 0) {y_mod += canvas.height;}
     return [x_mod, y_mod];
 }
 // counter-clock-wise prepedicular of 2-dim vector a 
@@ -72,7 +72,7 @@ function TT(a){ return [-a[1], a[0]]; }
 function dot(a, b){
     var i;
     var sum = 0; 
-    for (i = 0; i < a.length; i ++){ sum = sum + (a[i] * b[i]);}
+    for (i = 0; i < a.length; i ++){ sum += (a[i] * b[i]);}
     return sum;
 }
 
