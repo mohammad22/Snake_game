@@ -30,6 +30,72 @@ Snakehandler = function(){}; // global varibale to handle Snake state and moveme
 canvas.width  = Math.floor(this.innerWidth / (2 * w)) * (2 * w - 1);
 canvas.height = Math.floor(this.innerHeight / (2 * w)) * (2 * w - 1);
 
+Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
+
+	/* if A and B denote the vector coordinate of upper left, lower right vertices of the cell o, then we can see: 
+	*                    A = o - w * |u| - h * |TT(u)|, 
+	*                    B = o + w * |u| + h * |TT(u)|
+	*/ 
+	
+	//Draws the cell with the given color, if color argument is not provided
+	//it draws our classic snake cell
+	
+	this.o = [x, y];
+	
+	this.u = [u0, u1];
+	
+	this.Draw = function (color = undefined){
+		var o = this.o;
+		var u = this.u;
+		var Tu = TT(u);
+		var x = sum(sum(o, scalar(-w , abs(u))), scalar(-h, abs(Tu)));
+		var y = sum(sum(o, scalar(w , abs(u))), scalar(h, abs(Tu)));
+		var ww = abs(sum(x, scalar(-1, y)));
+		if (color === undefined) {
+			var gradient = ctx.createLinearGradient(x[0], x[1], y[0], y[1]);
+			gradient.addColorStop("0", "magenta");
+			gradient.addColorStop("1", "blue");
+			ctx.fillStyle = gradient; 
+		}    
+		else { ctx.fillStyle = color; }
+		ctx.beginPath();
+		ctx.fillRect(x[0], x[1], ww[0], ww[1]);
+	};
+	
+	// returns true if p is an interior point of the cell; 
+	// otherwise returns false; ww: the width, hh: the height of cell
+	
+	this.is_in = function (p, ww = w, hh = h){
+		var o = this.o;
+		var u = this.u;
+		var Tu = TT(u);
+		var p_o = sum(p, scalar(-1, o));
+		if ((Math.abs(dot(u, p_o)) <= ww) && (Math.abs(dot(Tu, p_o)) <= hh))
+			{return true;}
+		else 
+			{return false;}
+	};
+	
+	//returns true if cell has an intersection with any of the cells within
+	// the cells of the wall; otheriwse returns false
+	
+	this.crash = function(wall){
+		var o = this.o;
+		var u = this.u;
+		var oo1 = sum(o, scalar(w / 2, u));
+		var oo2 = sum(o, scalar(-w / 2, u));
+		var i, cel;
+		var len = wall.length;
+		for (i = 0; i < len; i++){
+			cel = wall[i];
+			if (cel.is_in(oo1) || cel.is_in(oo2)){ return true;}
+		}   
+		return false;
+	};    
+
+}
+
+
 // Snake and Ball declaration
 /* each cell is the collection  of its center o, and its direction u;
  * the width of rectangle is drawn in the direction u, the height h in
@@ -224,70 +290,6 @@ function norm(a){return dot(a, a);}
 // distance of two vectors as point coordinates 
 function dist(a, b){return norm(sum(a, scalar(-1, b)));}
 
-Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
-
-	/* if A and B denote the vector coordinate of upper left, lower right vertices of the cell o, then we can see: 
-	*                    A = o - w * |u| - h * |TT(u)|, 
-	*                    B = o + w * |u| + h * |TT(u)|
-	*/ 
-	
-	//Draws the cell with the given color, if color argument is not provided
-	//it draws our classic snake cell
-	
-	this.o = [x, y];
-	
-	this.u = [u0, u1];
-	
-	this.Draw = function (color = undefined){
-		var o = this.o;
-		var u = this.u;
-		var Tu = TT(u);
-		var x = sum(sum(o, scalar(-w , abs(u))), scalar(-h, abs(Tu)));
-		var y = sum(sum(o, scalar(w , abs(u))), scalar(h, abs(Tu)));
-		var ww = abs(sum(x, scalar(-1, y)));
-		if (color === undefined) {
-			var gradient = ctx.createLinearGradient(x[0], x[1], y[0], y[1]);
-			gradient.addColorStop("0", "magenta");
-			gradient.addColorStop("1", "blue");
-			ctx.fillStyle = gradient; 
-		}    
-		else { ctx.fillStyle = color; }
-		ctx.beginPath();
-		ctx.fillRect(x[0], x[1], ww[0], ww[1]);
-	};
-	
-	// returns true if p is an interior point of the cell; 
-	// otherwise returns false; ww: the width, hh: the height of cell
-	
-	this.is_in = function (p, ww = w, hh = h){
-		var o = this.o;
-		var u = this.u;
-		var Tu = TT(u);
-		var p_o = sum(p, scalar(-1, o));
-		if ((Math.abs(dot(u, p_o)) <= ww) && (Math.abs(dot(Tu, p_o)) <= hh))
-			{return true;}
-		else 
-			{return false;}
-	};
-	
-	//returns true if cell has an intersection with any of the cells within
-	// the cells of the wall; otheriwse returns false
-	
-	this.crash = function(wall){
-		var o = this.o;
-		var u = this.u;
-		var oo1 = sum(o, scalar(w / 2, u));
-		var oo2 = sum(o, scalar(-w / 2, u));
-		var i, cel;
-		var len = wall.length;
-		for (i = 0; i < len; i++){
-			cel = wall[i];
-			if (cel.is_in(oo1) || cel.is_in(oo2)){ return true;}
-		}   
-		return false;
-	};    
-
-}
 
 // events 
 function user_event_handler (event){
