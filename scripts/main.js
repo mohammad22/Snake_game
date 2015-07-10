@@ -189,7 +189,7 @@ var Ball = function() {
 		ctx.stroke();
 	};
 	
-	// Resets randomly a new center for the ball
+	// returns a a new  ball object
 	
 	this.Reset = function(snake){
 		var cells = snake.cells;
