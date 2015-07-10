@@ -35,16 +35,18 @@ canvas.height = Math.floor(this.innerHeight / (2 * w)) * (2 * w - 1);
  * the width of rectangle is drawn in the direction u, the height h in
  * the direction of TT(u); 
  * d is the direction of Snake   */
-var x = 2 * h;
-var y = 2 * w;
 var Snake = function(){
+    
     this.cells = [new Cell()]; 
+    
     this.d = [1, 0];      
+	
 	/* 
 	To locate the center of a shifted cell we need the coodinates of the
 	* original cell (its center & direction) and the direction of shift m 
 	* Shif: returns the boolean value was_feed indicating if Snake hit 
 	* the ball or not.*/
+	
 	this.Shift = function (ball, m = this.cells[0].u){
 		var o2 = [NaN, NaN];
 		var o = this.cells[0].o;
@@ -67,27 +69,38 @@ var Snake = function(){
 		this.cells[0].Draw();
 		return was_feed;
 	};
+	
 	// returns true if snake hits the Ball; otheriwse returns false
+	
 	this.was_feed = function (ball){
 		return ball.hit(this.cells[0]);
 	};
+	
 	//returns true if the Snake has crossed itself, otherwise return false
+	
 	this.crash = function (){
 		return this.cells[0].crash(this.cells.slice(2));     
 	};
+
 };
 
 var Ball = function() {
-    this.center = mod_canvas([40 * x, 10 * y]);
+    
+    this.center = mod_canvas([40 * h, 10 * w]);
+    
     this.radius = h;        
+	
 	// This function is based on the fact that: a circle has nonempty 
 	// intersection  with a rectangle iff the center of circle is inside the
 	// rectangle obtained by growing width and height of the original rectangle // according to circle-radius
+	
 	this.hit = function (cell, ww = w, hh = h){
 		var R = this.radius;
 		return cell.is_in(this.center, ww + R, hh + R); 
 	};
+	
 	// Draws the ball object with the given color argument, otherwise it draws our classic default ball
+	
 	this.Draw = function (color = undefined){
 		var R = this.radius;
 		var cc = this.center;
@@ -109,7 +122,9 @@ var Ball = function() {
 		ctx.fill();
 		ctx.stroke();
 	};
+	
 	// Resets randomly a new center for the ball
+	
 	this.Reset = function(snake){
 		var cells = snake.cells;
 		var balll = new Ball();
@@ -147,6 +162,7 @@ var Ball = function() {
 		snake.cells[0].Draw();
 	    return balll;
 	};
+
 };
 
 // Level and Wall declarations
@@ -208,15 +224,20 @@ function norm(a){return dot(a, a);}
 // distance of two vectors as point coordinates 
 function dist(a, b){return norm(sum(a, scalar(-1, b)));}
 
-Cell = function(x = 0, y = 0, u0 = 0, u1 = 1){
+Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
+
 	/* if A and B denote the vector coordinate of upper left, lower right vertices of the cell o, then we can see: 
 	*                    A = o - w * |u| - h * |TT(u)|, 
 	*                    B = o + w * |u| + h * |TT(u)|
 	*/ 
+	
 	//Draws the cell with the given color, if color argument is not provided
 	//it draws our classic snake cell
+	
 	this.o = [x, y];
+	
 	this.u = [u0, u1];
+	
 	this.Draw = function (color = undefined){
 		var o = this.o;
 		var u = this.u;
@@ -234,8 +255,10 @@ Cell = function(x = 0, y = 0, u0 = 0, u1 = 1){
 		ctx.beginPath();
 		ctx.fillRect(x[0], x[1], ww[0], ww[1]);
 	};
+	
 	// returns true if p is an interior point of the cell; 
 	// otherwise returns false; ww: the width, hh: the height of cell
+	
 	this.is_in = function (p, ww = w, hh = h){
 		var o = this.o;
 		var u = this.u;
@@ -246,8 +269,10 @@ Cell = function(x = 0, y = 0, u0 = 0, u1 = 1){
 		else 
 			{return false;}
 	};
+	
 	//returns true if cell has an intersection with any of the cells within
 	// the cells of the wall; otheriwse returns false
+	
 	this.crash = function(wall){
 		var o = this.o;
 		var u = this.u;
@@ -261,6 +286,7 @@ Cell = function(x = 0, y = 0, u0 = 0, u1 = 1){
 		}   
 		return false;
 	};    
+
 }
 
 // events 
