@@ -141,7 +141,7 @@ var Ball = function() {
 		this.Draw(backgroundcolor);
 		var balll = this.Reset(snake);
 		balll.Draw();
-		snake.cells[0].Draw();
+		Draw_cell(snake.cells[0]);
 	    return balll;
 	};
 };
@@ -264,7 +264,7 @@ function is_in_cell(cell, p, ww = w, hh = h){
 
 
 // events 
-function user_event_handler (event, snake){
+function user_event_handler (event){
     var x = event.which || event.keycode;
     if (x === up_key) {snake.d = [0, -1];}
     else if (x === down_key) {snake.d = [0, 1];}
@@ -295,7 +295,7 @@ function snake_handler(){
 }
 
 // start
-snake = new Snake();
-ball = new Ball();
+var snake = new Snake();
+var ball = new Ball();
 ball.Draw();
 gamehandler();
