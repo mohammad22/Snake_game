@@ -37,14 +37,113 @@ canvas.height = Math.floor(this.innerHeight / h) * (h - 1);
  * d is the direction of Snake   */
 var x = 2 * h;
 var y = 2 * w;
-Snake = {
-    cells: [{o:mod_canvas([x, y]), u: [1, 0]}],
-    d: [1, 0]      
+var Snake = function(){
+    this.cells = [{o:mod_canvas([x, y]), u: [1, 0]}];
+    this.d = [1, 0];      
+	/* To locate the center of a shifted cell we need the coodinates of the
+	* original cell (its center & direction) and the direction of shift m 
+	* Shif: returns the boolean value was_feed indicating if Snake hit 
+	* the ball or not. */
+	this.Shift = function (ball, m = this.cells[0].u){
+		var o2 = [NaN, NaN];
+		var o = this.cells[0].o;
+		var u = this.cells[0].u;
+		if (dot(u, m) === 0) { o2 = sum(o, scalar((w - h), sum(u, m))); } 
+		else if (dot(u, m) === 1 || dot(u, m) === -1 ){ // it can not return on itself, instead continues in its head-direction 
+			m = u;
+			o2 = sum(o, scalar(2 * w, m));
+		}
+		this.cells.unshift({o: mod_canvas(o2), u: m});
+		var l = this.cells.length;
+		var was_feed = this.was_feed(ball);
+		if (was_feed === false) {
+			Draw_cell(this.cells[l - 1], backgroundcolor);
+			this.cells.pop(); 
+		} 
+		Draw_cell(this.cells[0]);
+		return was_feed;
+	};
+	// returns true if snake hits the Ball; otheriwse returns false
+	this.was_feed = function (ball){
+		return ball.hit_cell(this.cells[0]);
+	};
+	//returns true if the Snake has crossed itself, otherwise return false
+	this.crash = function (){
+		return cell_wall_crash(this.cells[0], this.cells.slice(2))     
+	}
 };
 
-Ball = {
-    center: mod_canvas([40 * x, 10 * y]),
-    radius: h,        
+var Ball = function() {
+    this.center = mod_canvas([40 * x, 10 * y]);
+    this.radius = h;        
+	// This function is based on the fact that: a circle has nonempty 
+	// intersection  with a rectangle iff the center of circle is inside the
+	// rectangle obtained by growing width and height of the original rectangle // according to circle-radius
+	this.hit_cell = function (cell, ww = w, hh = h){
+		var b = this.center;
+		var R = this.radius;
+		return is_in_cell(cell, b, w + R, h + R, ww, hh); 
+	};
+	// Draws the ball object with the given color argument, otherwise it draws our classic default ball
+	this.Draw = function (color = undefined){
+		var R = this.radius;
+		var cc = this.center;
+		var A = cc[0] - R;
+		var B = cc[1] - R;
+		var C = cc[0] + R;
+		var D = cc[1] + R;
+		if (color === undefined) { 
+			var gradient = ctx.createLinearGradient(A, B, C, D);
+			gradient.addColorStop("0", "green");
+			gradient.addColorStop("0.5", "green");
+			gradient.addColorStop("1.0", "yellow");
+			ctx.fillStyle = gradient; 
+		}
+		else { ctx.fillStyle = color; }
+		ctx.strokeStyle = "white";
+		ctx.beginPath();
+		ctx.arc(cc[0], cc[1], R, 0, 2 * Math.PI);
+		ctx.fill();
+		ctx.stroke();
+	};
+	// Resets randomly a new center for the ball
+	this.Reset = function(snake){
+		var cells = snake.cells;
+		var balll = new Ball();
+		var i, x, y;
+		var ball_ok = false; //state of the new random ball up to now
+		var R = balll.radius;
+		var cw = canvas.width;
+		var ch = canvas.height;
+		// concerning different levels later:
+		// the cells variable can be initialized before the following code
+		// to include both cells of the snake and walls for any levels
+		while (ball_ok === false){
+			x = Math.random() * cw;
+			y = Math.random() * ch;    
+			balll.center = mod_canvas([x, y]);
+			if (balll.center[0] < R) {balll.center[0] += R;}
+			if (balll.center[1] < R) {balll.center[1] += R;}
+			if (balll.center[0] > cw - R) { balll.center[0] += R; }
+			if (balll.center[1] > ch - R) { balll.center[0] += R; }
+			for (i = 0; i < cells.length; i++){
+				if (balll.hit_cell(cells[i])) { 
+					ball_ok = false; 
+					break;
+				}
+				ball_ok = true;
+			}
+		}
+		return balll;
+	};
+
+	this._new = function (snake){
+		this.Draw(backgroundcolor);
+		var balll = this.Reset(snake);
+		balll.Draw();
+		snake.cells[0].Draw();
+	    return balll;
+	};
 };
 
 // Level and Wall declarations
@@ -130,88 +229,9 @@ function Draw_cell (cell, color = undefined){
     ctx.fillRect(x[0], x[1], ww[0], ww[1]);
 }
 
-// Draws the ball object with the given color argument, otherwise it draws our classic default ball
-function Draw_Ball (color = undefined){
-    var R = Ball.radius;
-    var cc = Ball.center;
-    var A = cc[0] - R;
-    var B = cc[1] - R;
-    var C = cc[0] + R;
-    var D = cc[1] + R;
-    if (color === undefined) { 
-        var gradient = ctx.createLinearGradient(A, B, C, D);
-        gradient.addColorStop("0", "green");
-        gradient.addColorStop("0.5", "green");
-        gradient.addColorStop("1.0", "yellow");
-        ctx.fillStyle = gradient; 
-    }
-    else { ctx.fillStyle = color; }
-    ctx.strokeStyle = "white";
-    ctx.beginPath();
-    ctx.arc(cc[0], cc[1], R, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.stroke();
-}
 
-/* To locate the center of a shifted cell we need the coodinates of the
- * original cell (its center & direction) and the direction of shift m 
- * Shif_Snake: returns the boolean value was_feed indicating if Snake hit 
- * the ball or not. */
-function Shift_Snake (Snake, m  = Snake.cells[0].u){
-    var o2 = [NaN, NaN];
-    var o = Snake.cells[0].o;
-    var u = Snake.cells[0].u;
-    if (dot(u, m) === 0) { o2 = sum(o, scalar((w - h), sum(u, m))); } 
-    else if (dot(u, m) === 1 || dot(u, m) === -1 ){ // it can not return on itself, instead continues in its head-direction 
-        m = u;
-        o2 = sum(o, scalar(2 * w, m));
-    }
-    Snake.cells.unshift({o: mod_canvas(o2), u: m});
-    var l = Snake.cells.length;
-    var was_feed = Snake_was_feed();
-    if (was_feed === false) {
-        Draw_cell(Snake.cells[l - 1], backgroundcolor);
-        Snake.cells.pop(); 
-    } 
-    Draw_cell(Snake.cells[0]);
-    return was_feed;
-}
 
-// Resets randomly a new center for the ball
-function Reset_Ball(){
-    var cells = Snake.cells;
-    var ball = {center:[0, 0], radius: h};
-    var i, x, y;
-    var ball_ok = false; //state of the new random ball up to now
-    var R = ball.radius;
-    var cw = canvas.width;
-    var ch = canvas.height;
-    // concerning different levels later:
-    // the cells variable can be initialized before the following code
-    // to include both cells of the snake and walls for any levels
-    while (ball_ok === false){
-        x = Math.random() * cw;
-        y = Math.random() * ch;    
-        ball.center = mod_canvas([x, y]);
-        if (ball.center[0] < R) {ball.center[0] += R;}
-        if (ball.center[1] < R) {ball.center[1] += R;}
-        if (ball.center[0] > cw - R) { ball.center[0] += R; }
-        if (ball.center[1] > ch - R) { ball.center[0] += R; }
-        for (i = 0; i < cells.length; i++){
-            if (ball_hit_cell(ball, cells[i])) { 
-                ball_ok = false; 
-                break;
-            }
-            ball_ok = true;
-        }
-    }
-    Ball = ball;
-}
 
-//returns true if the Snake has crossed itself, otherwise return false
-function Snake_crash(){
-    return cell_wall_crash(Snake.cells[0], Snake.cells.slice(2))     
-}
 
 //returns true if cell has an intersection with any of the cells within
 // the cells of the wall; otheriwse returns false
@@ -242,48 +262,14 @@ function is_in_cell(cell, p, ww = w, hh = h){
         {return false;}
 }
 
-// This function is based on the fact that: a circle has nonempty 
-// intersection  with a rectangle iff the center of circle is inside the
-// rectangle obtained by growing width and height of the original rectangle // according to circle-radius
-function ball_hit_cell(ball, cell, ww = w, hh = h){
-    var b = ball.center;
-    var R = ball.radius;
-    return is_in_cell(cell, b, w + R, h + R, ww, hh); 
-}
-
-// returns true if snake hits the Ball; otheriwse returns false
-function Snake_was_feed(){
-    return ball_hit_cell(Ball, Snake.cells[0]);
-}
-
-function Draw_new_Ball(){
-    Draw_Ball(backgroundcolor);
-    Reset_Ball();
-    Draw_Ball();
-    Draw_cell(Snake.cells[0]);
-}
-
-function snake_handler(){
-    var was_feed = Shift_Snake(Snake, Snake.d);
-    if (was_feed && game_on) {
-        clearInterval(Snakehandler);
-        Draw_new_Ball();
-        stime = stime - 10;
-        gamehandler();
-    }
-    if (Snake_crash()) { 
-        alert("Congratulations! You scored: " + Snake.cells.length);
-        clearInterval(Snakehandler); 
-    }
-}
 
 // events 
-function user_event_handler (event){
+function user_event_handler (event, snake){
     var x = event.which || event.keycode;
-    if (x === up_key) {Snake.d = [0, -1];}
-    else if (x === down_key) {Snake.d = [0, 1];}
-    else if (x === right_key) {Snake.d = [1, 0];}
-    else if (x === left_key) {Snake.d = [-1, 0];}
+    if (x === up_key) {snake.d = [0, -1];}
+    else if (x === down_key) {snake.d = [0, 1];}
+    else if (x === right_key) {snake.d = [1, 0];}
+    else if (x === left_key) {snake.d = [-1, 0];}
     else if (x === space_key) {stop_game = true; // this is for debugg
                                clearInterval(Snakehandler);}
 }
@@ -294,6 +280,22 @@ function gamehandler(){
     Snakehandler = window.setInterval(snake_handler, stime);
 } 
 
+function snake_handler(){
+    var was_feed = snake.Shift(ball, snake.d);
+    if (was_feed && game_on) {
+        clearInterval(Snakehandler);
+        ball = ball._new(snake);
+        stime = stime - 10;
+        gamehandler();
+    }
+    if (snake.crash()) { 
+        alert("Congratulations! You scored: " + snake.cells.length);
+        clearInterval(Snakehandler); 
+    }
+}
+
 // start
-Draw_new_Ball();
+snake = new Snake();
+ball = new Ball();
+ball.Draw();
 gamehandler();
