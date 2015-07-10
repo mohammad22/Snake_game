@@ -40,10 +40,11 @@ var y = 2 * w;
 var Snake = function(){
     this.cells = [new Cell()]; 
     this.d = [1, 0];      
-	/* To locate the center of a shifted cell we need the coodinates of the
+	/* 
+	To locate the center of a shifted cell we need the coodinates of the
 	* original cell (its center & direction) and the direction of shift m 
 	* Shif: returns the boolean value was_feed indicating if Snake hit 
-	* the ball or not. */
+	* the ball or not.*/
 	this.Shift = function (ball, m = this.cells[0].u){
 		var o2 = [NaN, NaN];
 		var o = this.cells[0].o;
