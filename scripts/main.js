@@ -31,20 +31,20 @@ canvas.width  = Math.floor(this.innerWidth / (2 * w)) * (2 * w - 1);
 canvas.height = Math.floor(this.innerHeight / (2 * w)) * (2 * w - 1);
 
 Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
-
-	/* if A and B denote the vector coordinate of upper left, lower right vertices of the cell o, then we can see: 
-	*                    A = o - w * |u| - h * |TT(u)|, 
-	*                    B = o + w * |u| + h * |TT(u)|
-	*/ 
 	
-	//Draws the cell with the given color, if color argument is not provided
-	//it draws our classic snake cell
 	
 	this.o = [x, y];
 	
 	this.u = [u0, u1];
 	
-	this.Draw = function (color = undefined){
+	/* if A and B denote the vector coordinate of upper left, lower right
+	* vertices of the cell o, then we can see: 
+	*                    A = o - w * |u| - h * |TT(u)|, 
+	*                    B = o + w * |u| + h * |TT(u)|
+	*/ 
+	//Draws the cell with the given color, if color argument is not
+	//provided it draws our classic snake cell
+    this.Draw = function (color = undefined){
 		var o = this.o;
 		var u = this.u;
 		var Tu = TT(u);
@@ -110,7 +110,8 @@ var Snake = function(){
 	/* 
 	To locate the center of a shifted cell we need the coodinates of the
 	* original cell (its center & direction) and the direction of shift m 
-	* Shif: returns the boolean value was_feed indicating if Snake hit 
+	* also we need ball object to decide the type of shift 
+	* Shifi: returns the boolean value was_feed indicating if Snake hit 
 	* the ball or not.*/
 	
 	this.Shift = function (ball, m = this.cells[0].u){
@@ -189,14 +190,14 @@ var Ball = function() {
 		ctx.stroke();
 	};
 	
-	// returns a a new  ball object
+	// returns a new ball object
 	
 	this.Reset = function(snake){
 		var cells = snake.cells;
-		var balll = new Ball();
+		var ball = new Ball();
 		var i, x, y;
 		var ball_ok = false; //state of the new random ball up to now
-		var R = balll.radius;
+		var R = ball.radius;
 		var cw = canvas.width;
 		var ch = canvas.height;
 		// concerning different levels later:
@@ -205,20 +206,20 @@ var Ball = function() {
 		while (ball_ok === false){
 			x = Math.random() * cw;
 			y = Math.random() * ch;    
-			balll.center = mod_canvas([x, y]);
-			if (balll.center[0] < R) {balll.center[0] += R;}
-			if (balll.center[1] < R) {balll.center[1] += R;}
-			if (balll.center[0] > cw - R) { balll.center[0] += R; }
-			if (balll.center[1] > ch - R) { balll.center[0] += R; }
+			ball.center = mod_canvas([x, y]);
+			if (ball.center[0] < R) {ball.center[0] += R;}
+			if (ball.center[1] < R) {ball.center[1] += R;}
+			if (ball.center[0] > cw - R) { ball.center[0] += R; }
+			if (ball.center[1] > ch - R) { ball.center[0] += R; }
 			for (i = 0; i < cells.length; i++){
-				if (balll.hit(cells[i])) { 
+				if (ball.hit(cells[i])) { 
 					ball_ok = false; 
 					break;
 				}
 				ball_ok = true;
 			}
 		}
-		return balll;
+		return ball;
 	};
 
 	this._new = function (snake){
