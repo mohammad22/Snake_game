@@ -30,6 +30,14 @@ Snakehandler = function(){}; // global varibale to handle Snake state and moveme
 canvas.width  = Math.floor(this.innerWidth / (2 * w)) * (2 * w - 1);
 canvas.height = Math.floor(this.innerHeight / (2 * w)) * (2 * w - 1);
 
+/*
+ * Each Cell is rectangle which is completely determined
+ * by its center coordinate o and its direction u in the plane. 
+ * The width of cell is drawn in the direction u, the height h in
+ * the direction of TT(u) (the vector orthogonal to u such that 
+ * {u, TT(u)} is a right-hand basis of the plane); 
+ * Every Snake (Wall) is a collection of cells.
+*/
 Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
 	
 	
@@ -96,11 +104,11 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
 }
 
 
-// Snake and Ball declaration
-/* each cell is the collection  of its center o, and its direction u;
- * the width of rectangle is drawn in the direction u, the height h in
- * the direction of TT(u); 
- * d is the direction of Snake   */
+/* Snake is a collection of cells and direction d.
+ * This d is a thing, separated from the direction of cells; it
+ * determines the next direction of the Snake head in its next 
+ * movement; it is the entry point of user command for the Snake movement.
+*/
 var Snake = function(){
     
     this.cells = [new Cell()]; 
@@ -115,7 +123,7 @@ var Snake = function(){
     * the ball or not.*/
     
     this.Shift = function (ball, m = this.cells[0].u){
-        var o2 = [NaN, NaN];
+        var o2 = [0, 0];
         var o = this.cells[0].o;
         var u = this.cells[0].u;
         if (dot(u, m) === 0) { 
@@ -151,6 +159,9 @@ var Snake = function(){
 
 };
 
+/*
+ * The ball is determined by its center coordinates and its radius.
+*/
 var Ball = function() {
     
     this.center = mod_canvas([40 * h, 10 * w]);
