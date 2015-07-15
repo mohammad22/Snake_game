@@ -1,4 +1,4 @@
-
+//
 // global variables 
 
 canvas = document.getElementById("myCanvas");
