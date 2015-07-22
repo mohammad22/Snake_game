@@ -84,19 +84,23 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
             {return false;}
     };
     
-    //returns true if cell has an intersection with any of the cells within
-    // the cells of the wall; otheriwse returns false
+    //returns true if cell has an intersection with any of the cells 
+    // of the wall; otheriwse returns false
     
     this.crash = function(wall){
         var o = this.o,
             u = this.u,
-            oo1 = sum(o, scalar(w / 2, u)),
-            oo2 = sum(o, scalar(-w / 2, u)),
+            Tu = TT(u),
+            o1 = sum(o, sum(scalar(w, u), scalar(h, Tu))),
+            o2 = sum(o, sum(scalar(w, u), scalar(-h, Tu))),
+            o3 = sum(o, sum(scalar(-w, u), scalar(-h, Tu))),
+            o4 = sum(o, sum(scalar(-w, u), scalar(h, Tu))),
             i, cel,
             len = wall.length;
         for (i = 0; i < len; i++){
             cel = wall[i];
-            if (cel.is_in(oo1) || cel.is_in(oo2)){ return true;}
+            if (cel.is_in(o1) || cel.is_in(o2) || 
+            	cel.is_in(o3) || cel.is_in(o4)){ return true;}
         }   
         return false;
     };    
