@@ -139,6 +139,10 @@ var Snake = function(){
             was_feed = this.was_feed(ball);
         if (was_feed === false) {
             this.cells[l - 1].Draw(backgroundcolor);
+            if (l >= 1 && 
+            		dot(this.cells[l - 1].u, this.cells[l - 2].u) === 0) {
+                this.cells[l - 2].Draw();
+            }
             this.cells.pop(); 
         } 
         this.cells[0].Draw();
