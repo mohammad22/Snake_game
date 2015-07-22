@@ -4,7 +4,11 @@
 canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-// half-height and half-width  of each cell of Snake
+// half-height and half-width  of each cell  (be it a Snake or a wall cell)
+// probably this is bad design to hardcode this throughout the code
+// may be later I should move them as cell properties
+// but for now as far as I see all the cells will remain fixed size
+// and this is  very convenient  
 h = 6; 
 w = 2 * h; 
 
@@ -95,15 +99,18 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
             o2 = sum(o, sum(scalar(w, u), scalar(-h, Tu))),
             o3 = sum(o, sum(scalar(-w, u), scalar(-h, Tu))),
             o4 = sum(o, sum(scalar(-w, u), scalar(h, Tu))),
-            o5 = sum(o, scalar( w/2, u)),
-            o6 = sum(o, scalar(-w/2, u)),
+            o5 = sum(o, sum(scalar(w/2, u), scalar(h, Tu))),
+            o6 = sum(o, sum(scalar(w/2, u), scalar(-h, Tu))),
+            o7 = sum(o, sum(scalar(-w/2, u), scalar(h, Tu))),
+            o8 = sum(o, sum(scalar(-w/2, u), scalar(-h, Tu))),
             i, cel,
             len = wall.length;
         for (i = 0; i < len; i++){
             cel = wall[i];
             if (cel.is_in(o1) || cel.is_in(o2) || 
             	cel.is_in(o3) || cel.is_in(o4) ||
-            	cel.is_in(o5) || cel.is_in(o6)){ return true;}
+            	cel.is_in(o5) || cel.is_in(o6) ||
+            	cel.is_in(o6) || cel.is_in(o7)){ return true;}
         }   
         return false;
     };    
