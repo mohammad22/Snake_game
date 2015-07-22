@@ -110,7 +110,7 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
             if (cel.is_in(o1) || cel.is_in(o2) || 
             	cel.is_in(o3) || cel.is_in(o4) ||
             	cel.is_in(o5) || cel.is_in(o6) ||
-            	cel.is_in(o6) || cel.is_in(o7)){ return true;}
+            	cel.is_in(o7) || cel.is_in(o8)){ return true;}
         }   
         return false;
     };    
