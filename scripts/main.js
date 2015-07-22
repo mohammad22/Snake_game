@@ -251,7 +251,7 @@ Wall = function(){
 	this.level = Level;
 	this.len = 10 * this.level;
 	this.first_x = Math.floor(canvas.width / 2) - 2 * w * this.len;
-	this.first_y = Math.floor(canvas.height / 2)
+	this.first_y = Math.floor(canvas.height / 2);
     this.cells = [];
     var i;
     for (i = 0; i < this.len; i ++){
