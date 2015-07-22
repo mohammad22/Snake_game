@@ -54,8 +54,8 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
     //provided it draws our classic snake cell
     this.Draw = function (color = undefined){
         var o = this.o,
-			u = this.u,
-			Tu = TT(u),
+            u = this.u,
+            Tu = TT(u),
 			x = sum(sum(o, scalar(-w , abs(u))), scalar(-h, abs(Tu))),
 			y = sum(sum(o, scalar(w , abs(u))), scalar(h, abs(Tu))),
             ww = abs(sum(x, scalar(-1, y)));
