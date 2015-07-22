@@ -248,6 +248,7 @@ var Ball = function() {
 
 Level = 1;
 Wall = function(){
+	
 	this.level = Level;
 	this.len = 10 * this.level;
 	this.first_x = Math.floor(canvas.width / 2) - 2 * w * this.len;
