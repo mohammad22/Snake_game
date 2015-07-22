@@ -123,9 +123,9 @@ var Snake = function(){
     * the ball or not.*/
     
     this.Shift = function (ball, m = this.cells[0].u){
-        var o2 = [0, 0];
-        var o = this.cells[0].o;
-        var u = this.cells[0].u;
+        var o2 = [0, 0],
+            o = this.cells[0].o,
+            u = this.cells[0].u;
         if (dot(u, m) === 0) { 
             o2 = mod_canvas(sum(o, scalar((w - h), sum(u, m))));
         } 
@@ -135,8 +135,8 @@ var Snake = function(){
         }
         var cel = new Cell(o2[0], o2[1], m[0], m[1]);
         this.cells.unshift(cel);
-        var l = this.cells.length;
-        var was_feed = this.was_feed(ball);
+        var l = this.cells.length,
+            was_feed = this.was_feed(ball);
         if (was_feed === false) {
             this.cells[l - 1].Draw(backgroundcolor);
             this.cells.pop(); 
@@ -151,10 +151,11 @@ var Snake = function(){
         return ball.hit(this.cells[0]);
     };
     
-    //returns true if the Snake has crossed itself, otherwise return false
+    //returns true if the Snake has the wall, otherwise return false
+    // the default argument returns true when snake crosses itself
     
-    this.crash = function (){
-        return this.cells[0].crash(this.cells.slice(2));     
+    this.crash = function (wall = this.cells.slice(2)){
+        return this.cells[0].crash(wall);     
     };
 
 };
@@ -203,8 +204,8 @@ var Ball = function() {
     
     // returns a new ball object
     
-    this.Reset = function(snake){
-        var cells = snake.cells;
+    this.Reset = function(snake, wall){
+        var cells = snake.cells.concat(wall.cells);
         var ball = new Ball();
         var i, x, y;
         var ball_ok = false; //state of the new random ball up to now
@@ -233,9 +234,9 @@ var Ball = function() {
         return ball;
     };
 
-    this._new = function (snake){
+    this._new = function (snake, wall){
         this.Draw(backgroundcolor);
-        var balll = this.Reset(snake);
+        var balll = this.Reset(snake, wall);
         balll.Draw();
         snake.cells[0].Draw();
         return balll;
@@ -246,8 +247,27 @@ var Ball = function() {
 // Level and Wall declarations
 
 Level = 1;
-Wall = {
-    cells: [{o: [0, 0], u:[1, 0]}], 
+Wall = function(){
+	this.level = Level;
+	this.len = 10 * this.level;
+	this.first_x = Math.floor(canvas.width / 2) - 2 * w * this.len;
+	this.first_y = Math.floor(canvas.height / 2)
+    this.cells = [];
+    var i;
+    for (i = 0; i < this.len; i ++){
+        this.cells.push(new Cell(this.first_x + 2 * w * i,
+        			this.first_y , 1, 0));
+    }
+    
+    this.Draw = function(){
+    	for (i = 0; i < this.len; i ++){ this.cells[i].Draw("blue"); } 
+    };
+    
+    this.Clean = function(){
+    	for (i = 0; i < this.len; i ++){
+    	    this.cells[i].Draw(backgroundcolor);
+    	} 
+    };
 };
 
 // Basic math functions//
@@ -326,11 +346,11 @@ function snake_handler(){
     var was_feed = snake.Shift(ball, snake.d);
     if (was_feed && game_on) {
         clearInterval(Snakehandler);
-        ball = ball._new(snake);
+        ball = ball._new(snake, wall);
         stime = stime - 10;
         gamehandler();
     }
-    if (snake.crash()) { 
+    if (snake.crash() || snake.crash(wall.cells)) { 
         alert("Congratulations! You scored: " + snake.cells.length);
         clearInterval(Snakehandler); 
     }
@@ -339,5 +359,7 @@ function snake_handler(){
 // start
 var snake = new Snake();
 var ball = new Ball();
+var wall = new Wall();
 ball.Draw();
+wall.Draw();
 gamehandler();
