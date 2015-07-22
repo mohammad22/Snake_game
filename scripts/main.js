@@ -78,7 +78,7 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
             u = this.u,
             Tu = TT(u),
             p_o = sum(p, scalar(-1, o));
-        if ((Math.abs(dot(u, p_o)) <= ww) && (Math.abs(dot(Tu, p_o)) <= hh))
+        if ((Math.abs(dot(u, p_o)) < ww) && (Math.abs(dot(Tu, p_o)) < hh))
             {return true;}
         else 
             {return false;}
@@ -95,12 +95,15 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
             o2 = sum(o, sum(scalar(w, u), scalar(-h, Tu))),
             o3 = sum(o, sum(scalar(-w, u), scalar(-h, Tu))),
             o4 = sum(o, sum(scalar(-w, u), scalar(h, Tu))),
+            o5 = sum(o, scalar( w/2, u)),
+            o6 = sum(o, scalar(-w/2, u)),
             i, cel,
             len = wall.length;
         for (i = 0; i < len; i++){
             cel = wall[i];
             if (cel.is_in(o1) || cel.is_in(o2) || 
-            	cel.is_in(o3) || cel.is_in(o4)){ return true;}
+            	cel.is_in(o3) || cel.is_in(o4) ||
+            	cel.is_in(o5) || cel.is_in(o6)){ return true;}
         }   
         return false;
     };    
