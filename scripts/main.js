@@ -53,12 +53,12 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
     //Draws the cell with the given color, if color argument is not
     //provided it draws our classic snake cell
     this.Draw = function (color = undefined){
-        var o = this.o;
-        var u = this.u;
-        var Tu = TT(u);
-        var x = sum(sum(o, scalar(-w , abs(u))), scalar(-h, abs(Tu)));
-        var y = sum(sum(o, scalar(w , abs(u))), scalar(h, abs(Tu)));
-        var ww = abs(sum(x, scalar(-1, y)));
+        var o = this.o,
+			u = this.u,
+			Tu = TT(u),
+			x = sum(sum(o, scalar(-w , abs(u))), scalar(-h, abs(Tu))),
+			y = sum(sum(o, scalar(w , abs(u))), scalar(h, abs(Tu))),
+            ww = abs(sum(x, scalar(-1, y)));
         if (color === undefined) {
             var gradient = ctx.createLinearGradient(x[0], x[1], y[0], y[1]);
             gradient.addColorStop("0", "magenta");
@@ -74,10 +74,10 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
     // otherwise returns false; ww: the width, hh: the height of cell
     
     this.is_in = function (p, ww = w, hh = h){
-        var o = this.o;
-        var u = this.u;
-        var Tu = TT(u);
-        var p_o = sum(p, scalar(-1, o));
+        var o = this.o,
+            u = this.u,
+            Tu = TT(u),
+            p_o = sum(p, scalar(-1, o));
         if ((Math.abs(dot(u, p_o)) <= ww) && (Math.abs(dot(Tu, p_o)) <= hh))
             {return true;}
         else 
@@ -88,12 +88,12 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
     // the cells of the wall; otheriwse returns false
     
     this.crash = function(wall){
-        var o = this.o;
-        var u = this.u;
-        var oo1 = sum(o, scalar(w / 2, u));
-        var oo2 = sum(o, scalar(-w / 2, u));
-        var i, cel;
-        var len = wall.length;
+        var o = this.o,
+            u = this.u,
+            oo1 = sum(o, scalar(w / 2, u)),
+            oo2 = sum(o, scalar(-w / 2, u)),
+            i, cel,
+            len = wall.length;
         for (i = 0; i < len; i++){
             cel = wall[i];
             if (cel.is_in(oo1) || cel.is_in(oo2)){ return true;}
@@ -181,12 +181,12 @@ var Ball = function() {
     // Draws the ball object with the given color argument, otherwise it draws our classic default ball
     
     this.Draw = function (color = undefined){
-        var R = this.radius;
-        var cc = this.center;
-        var A = cc[0] - R;
-        var B = cc[1] - R;
-        var C = cc[0] + R;
-        var D = cc[1] + R;
+        var R = this.radius,
+            cc = this.center,
+            A = cc[0] - R,
+            B = cc[1] - R,
+            C = cc[0] + R,
+            D = cc[1] + R;
         if (color === undefined) { 
             var gradient = ctx.createLinearGradient(A, B, C, D);
             gradient.addColorStop("0", "green");
@@ -205,16 +205,13 @@ var Ball = function() {
     // returns a new ball object
     
     this.Reset = function(snake, wall){
-        var cells = snake.cells.concat(wall.cells);
-        var ball = new Ball();
-        var i, x, y;
-        var ball_ok = false; //state of the new random ball up to now
-        var R = ball.radius;
-        var cw = canvas.width;
-        var ch = canvas.height;
-        // concerning different levels later:
-        // the cells variable can be initialized before the following code
-        // to include both cells of the snake and walls for any levels
+        var cells = snake.cells.concat(wall.cells),
+            ball = new Ball(),
+            i, x, y,
+            ball_ok = false, //state of the new random ball up to now
+            R = ball.radius,
+            cw = canvas.width,
+            ch = canvas.height;
         while (ball_ok === false){
             x = Math.random() * cw;
             y = Math.random() * ch;    
@@ -248,11 +245,10 @@ var Ball = function() {
 
 Level = 1;
 Wall = function(){
-	
-	this.level = Level;
-	this.len = 10 * this.level;
-	this.first_x = Math.floor(canvas.width / 2) - 2 * w * this.len;
-	this.first_y = Math.floor(canvas.height / 2);
+    this.level = Level;
+    this.len = 10 * this.level;
+    this.first_x = Math.floor(canvas.width / 2) - 2 * w * this.len;
+    this.first_y = Math.floor(canvas.height / 2);
     this.cells = [];
     var i;
     for (i = 0; i < this.len; i ++){
@@ -276,8 +272,8 @@ Wall = function(){
 //modular coordinate calculus: returns the coordinates of the point p
 // modulus canvas
 function mod_canvas(a){
-    var x_mod = a[0] % canvas.width;
-    var y_mod = a[1] % canvas.height;
+    var x_mod = a[0] % canvas.width,
+        y_mod = a[1] % canvas.height;
     if (x_mod <= 0) {x_mod += canvas.width;}
     if (y_mod <= 0) {y_mod += canvas.height;}
     return [x_mod, y_mod];
@@ -287,32 +283,28 @@ function TT(a){ return [-a[1], a[0]]; }
 
 // inner prodcut of vectors 
 function dot(a, b){
-    var i;
-    var sum = 0; 
+    var i, sum = 0; 
     for (i = 0; i < a.length; i ++){ sum += (a[i] * b[i]);}
     return sum;
 }
 
 // scalar product of a number and vector  array 
 function scalar(r, a){
-    var i;
-    var b = [];
+    var i, b = [];
     for (i = 0; i <a.length; i ++){ b[i] = r * a[i];}
     return b;
 }
 
 // vector summation 
 function sum(a, b){
-    var i;
-    d = [];
+    var i, d = [];
     for (i = 0; i < a.length; i ++){ d[i] = a[i] + b[i]; }
     return d;
 }  
 
 // abstract of a vector 
 function abs(a){
-    var i;
-    var d = [];
+    var i, d = [];
     for (i = 0; i < a.length; i ++){ d[i] = Math.abs(a[i]);}
     return d;    
 }
