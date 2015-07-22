@@ -56,8 +56,8 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
         var o = this.o,
             u = this.u,
             Tu = TT(u),
-			x = sum(sum(o, scalar(-w , abs(u))), scalar(-h, abs(Tu))),
-			y = sum(sum(o, scalar(w , abs(u))), scalar(h, abs(Tu))),
+            x = sum(sum(o, scalar(-w , abs(u))), scalar(-h, abs(Tu))),
+            y = sum(sum(o, scalar(w , abs(u))), scalar(h, abs(Tu))),
             ww = abs(sum(x, scalar(-1, y)));
         if (color === undefined) {
             var gradient = ctx.createLinearGradient(x[0], x[1], y[0], y[1]);
