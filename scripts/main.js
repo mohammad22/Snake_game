@@ -95,22 +95,26 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
         var o = this.o,
             u = this.u,
             Tu = TT(u),
-            o1 = sum(o, sum(scalar(w, u), scalar(h, Tu))),
-            o2 = sum(o, sum(scalar(w, u), scalar(-h, Tu))),
-            o3 = sum(o, sum(scalar(-w, u), scalar(-h, Tu))),
-            o4 = sum(o, sum(scalar(-w, u), scalar(h, Tu))),
-            o5 = sum(o, sum(scalar(w/2, u), scalar(h, Tu))),
-            o6 = sum(o, sum(scalar(w/2, u), scalar(-h, Tu))),
-            o7 = sum(o, sum(scalar(-w/2, u), scalar(h, Tu))),
-            o8 = sum(o, sum(scalar(-w/2, u), scalar(-h, Tu))),
             i, cel,
             len = wall.length;
         for (i = 0; i < len; i++){
             cel = wall[i];
-            if (cel.is_in(o1) || cel.is_in(o2) || 
-            	cel.is_in(o3) || cel.is_in(o4) ||
-            	cel.is_in(o5) || cel.is_in(o6) ||
-            	cel.is_in(o7) || cel.is_in(o8)){ return true;}
+            var o1 = sum(o, sum(scalar(w, u), scalar(h, Tu)));
+            if (cel.is_in(o1)){return true;}  
+            var o2 = sum(o, sum(scalar(w, u), scalar(-h, Tu)));
+            if (cel.is_in(o2)){return true;}  
+            var o3 = sum(o, sum(scalar(-w, u), scalar(-h, Tu)));
+            if (cel.is_in(o3)){return true;}  
+            var o4 = sum(o, sum(scalar(-w, u), scalar(h, Tu)));
+            if (cel.is_in(o4)){return true;}  
+            var o5 = sum(o, sum(scalar(w/2, u), scalar(h, Tu)));
+            if (cel.is_in(o5)){return true;}  
+            var o6 = sum(o, sum(scalar(w/2, u), scalar(-h, Tu)));
+            if (cel.is_in(o6)){return true;}  
+            var o7 = sum(o, sum(scalar(-w/2, u), scalar(h, Tu)));
+            if (cel.is_in(o7)){return true;}  
+            var o8 = sum(o, sum(scalar(-w/2, u), scalar(-h, Tu)));
+            if (cel.is_in(o8)){return true;}  
         }   
         return false;
     };    
@@ -193,7 +197,7 @@ var Ball = function() {
     
     this.hit = function (cell, ww = w, hh = h){
         var R = this.radius;
-        return cell.is_in(this.center, ww + R, hh + R); 
+        return cell.is_in(this.center, ww + R + 1/2, hh + R + 1/2); 
     };
     
     // Draws the ball object with the given color argument, otherwise it draws our classic default ball
@@ -361,7 +365,7 @@ function snake_handler(){
         stime = stime - 10;
         gamehandler();
     }
-    if (snake.crash() || snake.crash(wall.cells)) { 
+    if (snake.crash() || snake.crash(wall.cells)){ 
         alert("Congratulations! You scored: " + snake.cells.length);
         clearInterval(Snakehandler); 
     }
