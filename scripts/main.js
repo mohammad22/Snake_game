@@ -290,16 +290,16 @@ Wall = function(){
     // pushes a cell with coordinate o and direction u to jth wall
     this.push_cell_to_wall = function(cell, j){
         if (j > 0) {
-		    if (this.walls[j] === undefined){
-			    var b = this.walls[j - 1][1] + 1;
-			    this.walls[j] = [b, b];
-			    this.cells.push(cell);
-		    }
+            if (this.walls[j] === undefined){
+                var b = this.walls[j - 1][1] + 1;
+                this.walls[j] = [b, b];
+                this.cells.push(cell);
+            }
 		    else {
-	            this.walls[j][1] ++; 
-	            this.cells.push(cell);
-		    }
-	    }
+                this.walls[j][1] ++; 
+                this.cells.push(cell);
+            }
+        }
     };
     
     this.good_cell = function(cell){
@@ -331,8 +331,8 @@ Wall = function(){
                 var j = Math.floor(Math.random() * l) ;
                 if (j === 0 || j === -1 || j === l ){ j = l - 1;}
                 var f_c = this.first_cell(j),
-           	        cell = f_c[0],
-           	        d = f_c[1];		        
+                    cell = f_c[0],
+                    d = f_c[1];		        
                 if (this.good_cell(cell)) {break;}
             }
             while (this.good_cell(cell)){
@@ -351,7 +351,7 @@ Wall = function(){
                 o = sum(o, scalar(2 * d * w, u));
                 cell = new Cell(o[0], o[1], u[0], u[1]);
             } 
-	    }
+        }
     };
 
     this.Draw = function(){
