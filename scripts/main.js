@@ -31,8 +31,8 @@ game_on = true;
 Snakehandler = function(){}; // global varibale to handle Snake state and movement 
 
 // Dynamic canvas adjustment 
-canvas.width  = Math.floor(this.innerWidth / (2 * w)) * (2 * w - 1);
-canvas.height = Math.floor(this.innerHeight / (2 * w)) * (2 * w - 1);
+canvas.width  = (Math.floor(this.innerWidth / (4 * h))  - 2)  * 4 * h;
+canvas.height = (Math.floor(this.innerHeight / (4 * h)) - 2)  * 4 * h;
 
 /*
  * Each Cell is rectangle which is completely determined
@@ -42,7 +42,7 @@ canvas.height = Math.floor(this.innerHeight / (2 * w)) * (2 * w - 1);
  * {u, TT(u)} is a right-hand basis of the plane); 
  * Every Snake (Wall) is a collection of cells.
 */
-Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
+Cell = function (x = 6 * w, y = w, u0 = 0, u1 = 1){
 	
 	
     this.o = [x, y];
@@ -94,11 +94,9 @@ Cell = function (x = 0, y = 0, u0 = 0, u1 = 1){
     this.crash = function(wall){
         var o = this.o,
             u = this.u,
-            Tu = TT(u),
-            i, cel,
-            len = wall.length;
-        for (i = 0; i < len; i++){
-            cel = wall[i];
+            Tu = TT(u);
+        for (var i = 0; i < wall.length; i++){
+            var cel = wall[i];
             var o1 = sum(o, sum(scalar(w, u), scalar(h, Tu)));
             if (cel.is_in(o1)){return true;}  
             var o2 = sum(o, sum(scalar(w, u), scalar(-h, Tu)));
@@ -141,7 +139,7 @@ var Snake = function(){
     * the ball or not.*/
     
     this.Shift = function (ball, m = this.cells[0].u){
-        var o2 = [0, 0],
+        var o2 = [],
             o = this.cells[0].o,
             u = this.cells[0].u;
         if (dot(u, m) === 0) { 
@@ -158,7 +156,7 @@ var Snake = function(){
         if (was_feed === false) {
             this.cells[l - 1].Draw(backgroundcolor);
             if (l >= 1 && 
-            		dot(this.cells[l - 1].u, this.cells[l - 2].u) === 0) {
+            	dot(this.cells[l - 1].u, this.cells[l - 2].u) === 0) {
                 this.cells[l - 2].Draw();
             }
             this.cells.pop(); 
@@ -180,6 +178,17 @@ var Snake = function(){
         return this.cells[0].crash(wall);     
     };
 
+    this.erase = function(){
+        for (var i = 0; i < this.cells.length; i ++){
+        	this.cells[i].Draw(backgroundcolor);
+        }
+    };
+
+	this.Reset = function(wall){
+	    this.erase();
+	    var snake = new Snake();
+        return snake;
+	}
 };
 
 /*
@@ -227,7 +236,7 @@ var Ball = function() {
     // returns a new ball object
     
     this.Reset = function(snake, wall){
-        var cells = snake.cells.concat(wall.cells),
+        var cells = snake.cells.concat(wall.cells.slice(1)),
             ball = new Ball(),
             i, x, y,
             ball_ok = false, //state of the new random ball up to now
@@ -255,38 +264,102 @@ var Ball = function() {
 
     this._new = function (snake, wall){
         this.Draw(backgroundcolor);
-        var balll = this.Reset(snake, wall);
-        balll.Draw();
+        var ball = this.Reset(snake, wall);
+        ball.Draw();
         snake.cells[0].Draw();
-        return balll;
+        return ball;
     };
 
 };
 
-// Level and Wall declarations
+// Wall declarations, wall will be the only object responsible to keep 
+// track of the level of the game (this is good, because this is the only
+// which is level sensitive)
 
-Level = 1;
 Wall = function(){
-    this.level = Level;
-    this.len = 10 * this.level;
-    this.first_x = Math.floor(canvas.width / 2) - 2 * w * this.len;
-    this.first_y = Math.floor(canvas.height / 2);
-    this.cells = [];
-    var i;
-    for (i = 0; i < this.len; i ++){
-        this.cells.push(new Cell(this.first_x + 2 * w * i,
-        			this.first_y , 1, 0));
-    }
+   
+   	this.marg = 3;
+   	// the one cell is a dummy cell for the 0th wall which in turn is 
+   	// a dummy wall for the first level of the game  
+    this.cells = [new Cell()];
+    // which constiute the ith wall
+    // wall[0] is initialized to contains zero cells and should not be
+    // touched
+    this.walls = [[0, 0]]; 
     
-    this.Draw = function(){
-    	for (i = 0; i < this.len; i ++){ this.cells[i].Draw("blue"); } 
+    // pushes a cell with coordinate o and direction u to jth wall
+    this.push_cell_to_wall = function(cell, j){
+        if (j > 0) {
+			if (this.walls[j] === undefined){
+				var b = this.walls[j - 1][1] + 1;
+				this.walls[j] = [b, b];
+				this.cells.push(cell);
+			}
+			else {
+				this.walls[j][1] ++; 
+				this.cells.push(cell);
+			}
+	    }
     };
     
-    this.Clean = function(){
-    	for (i = 0; i < this.len; i ++){
-    	    this.cells[i].Draw(backgroundcolor);
+    this.good_cell = function(cell){
+    	var l = this.cells.length;
+        if (cell.crash(this.cells.slice(1, l - 1))){return false;}
+        var o = cell.o;
+        if (o[0] > canvas.width - this.marg * w || o[0] < this.marg * w ||
+            o[1] > canvas.height - this.marg * w || o[1] < this.marg * w ) {return false;}
+		else {return true;}
+    };
+
+	// returns center for initializing  wall orthogonal to jth wall 
+	this.first_cell = function(j){
+	    var i0 = this.walls[j][0],
+		    i1 = this.walls[j][1],
+		    u = this.cells[i0].u,
+		    Tu = TT(u),
+		    i = Math.floor((i0 + i1) / 2), 
+		    d = Math.floor(Math.random() * 2) ? -1:1,
+		    o = mod_canvas(sum(this.cells[i].o, scalar(this.marg * d * w, Tu)));
+		    cell = new Cell(o[0], o[1], Tu[0], Tu[1]);
+		return [cell, d];    
+	}
+
+    this.add = function(){
+    	var l = this.walls.length;
+    	if (l > 1) {
+            while(true){
+                var j = Math.floor(Math.random() * l) ;
+                if (j === 0 || j === -1 || j === l ){ j = l - 1;}
+           	    var f_c = this.first_cell(j),
+           	    	cell = f_c[0],
+           	    	d = f_c[1];		        
+                if (this.good_cell(cell)) {break;}
+			}
+            while (this.good_cell(cell)){
+                this.push_cell_to_wall(cell, l);
+                var c = sum(cell.o, scalar(2 * d * w, cell.u));
+                cell = new Cell(c[0], c[1], cell.u[0], cell.u[1]);
+            } 
+		}
+		else if (l === 1) {
+            var o = mod_canvas([this.marg * w, Math.floor(canvas.height / 2)]),
+                u = [1, 0],
+                d = 1,
+                cell = new Cell(o[0], o[1], u[0], u[1]);
+            while (this.good_cell(cell)){
+                this.push_cell_to_wall(cell, l);
+                o = sum(o, scalar(2 * d * w, u));
+                cell = new Cell(o[0], o[1], u[0], u[1]);
+            } 
+		}
+    };
+
+    this.Draw = function(){
+    	for (var i = 1; i < this.cells.length; i ++){ 
+    		this.cells[i].Draw("blue");
     	} 
     };
+    
 };
 
 // Basic math functions//
@@ -358,23 +431,32 @@ function gamehandler(){
 } 
 
 function snake_handler(){
-    var was_feed = snake.Shift(ball, snake.d);
+    var was_feed = snake.Shift(ball, snake.d),
+    	sc = 3,
+    	t = 3;
     if (was_feed && game_on) {
         clearInterval(Snakehandler);
         ball = ball._new(snake, wall);
-        stime = stime - 10;
+        stime = stime - t;
         gamehandler();
     }
-    if (snake.crash() || snake.crash(wall.cells)){ 
+    if (snake.crash() || snake.crash(wall.cells.slice(1))){ 
         alert("Congratulations! You scored: " + snake.cells.length);
         clearInterval(Snakehandler); 
+    }
+    if (snake.cells.length % sc === 0){
+        clearInterval(Snakehandler);
+        wall.add();
+        wall.Draw();
+        stime = stime - t * (sc - 1);
+        snake = snake.Reset();
+        gamehandler();
     }
 }
 
 // start
 var snake = new Snake();
-var ball = new Ball();
 var wall = new Wall();
+var ball = new Ball();
 ball.Draw();
-wall.Draw();
 gamehandler();
