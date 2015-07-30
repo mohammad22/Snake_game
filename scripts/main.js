@@ -1,5 +1,4 @@
-//
-// global variables 
+ 
 
 canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -12,19 +11,10 @@ var ctx = canvas.getContext("2d");
 h = 6; 
 w = 2 * h; 
 
-// controls the speed of the game
-stime = 300;
 
 // Snake and Ball trace eraser 
 backgroundcolor = "white"; 
 
-// unicode of relevant keys color  
-up_key = 38; 
-down_key = 40;
-right_key = 39;
-left_key = 37;
-enter_key = 13;
-space_key = 32;
 
 stop_game = false;
 game_on = true;
@@ -88,6 +78,16 @@ Cell = function (x = 6 * w, y = w, u0 = 0, u1 = 1){
             {return false;}
     };
     
+    this.is_on = function (p, ww = w, hh = h){
+        var o = this.o,
+            u = this.u,
+            Tu = TT(u),
+            p_o = sum(p, scalar(-1, o));
+        if ((Math.abs(dot(u, p_o)) <= ww) && (Math.abs(dot(Tu, p_o)) <= hh))
+            {return true;}
+        else 
+            {return false;}
+    };
     //returns true if cell has an intersection with any of the cells 
     // of the wall; otheriwse returns false
     
@@ -113,6 +113,35 @@ Cell = function (x = 6 * w, y = w, u0 = 0, u1 = 1){
             if (cel.is_in(o7)){return true;}  
             var o8 = sum(o, sum(scalar(-w/2, u), scalar(-h, Tu)));
             if (cel.is_in(o8)){return true;}  
+            var o9 = sum(o, scalar(w/2, u));
+            if (cel.is_in(o9)){return true;}  
+            var o10 = sum(o, scalar(-w/2, u));
+            if (cel.is_in(o10)){return true;}  
+        }   
+        return false;
+    };    
+    this.strict_crash = function(wall){
+        var o = this.o,
+            u = this.u,
+            Tu = TT(u);
+        for (var i = 0; i < wall.length; i++){
+            var cel = wall[i];
+            var o1 = sum(o, sum(scalar(w, u), scalar(h, Tu)));
+            if (cel.is_on(o1)){return true;}  
+            var o2 = sum(o, sum(scalar(w, u), scalar(-h, Tu)));
+            if (cel.is_on(o2)){return true;}  
+            var o3 = sum(o, sum(scalar(-w, u), scalar(-h, Tu)));
+            if (cel.is_on(o3)){return true;}  
+            var o4 = sum(o, sum(scalar(-w, u), scalar(h, Tu)));
+            if (cel.is_on(o4)){return true;}  
+            var o5 = sum(o, sum(scalar(w/2, u), scalar(h, Tu)));
+            if (cel.is_on(o5)){return true;}  
+            var o6 = sum(o, sum(scalar(w/2, u), scalar(-h, Tu)));
+            if (cel.is_on(o6)){return true;}  
+            var o7 = sum(o, sum(scalar(-w/2, u), scalar(h, Tu)));
+            if (cel.is_on(o7)){return true;}  
+            var o8 = sum(o, sum(scalar(-w/2, u), scalar(-h, Tu)));
+            if (cel.is_on(o8)){return true;}  
         }   
         return false;
     };    
@@ -178,6 +207,10 @@ var Snake = function(){
         return this.cells[0].crash(wall);     
     };
 
+    this.strict_crash = function(wall){
+        return this.cells[0].strict_crash(wall);
+    };
+    
     this.erase = function(){
         for (var i = 0; i < this.cells.length; i ++){
             this.cells[i].Draw(backgroundcolor);
@@ -201,8 +234,9 @@ var Ball = function() {
     this.radius = h;        
 	
     // This function is based on the fact that: a circle has nonempty 
-    // intersection  with a rectangle iff the center of circle is inside the
-    // rectangle obtained by growing width and height of the original rectangle // according to circle-radius
+    // intersection  with a rectangle if the center of circle is inside the
+    // rectangle obtained by growing width and height of the original 
+    // rectangle  according to circle-radius
     
     this.hit = function (cell, ww = w, hh = h){
         var R = this.radius;
@@ -247,10 +281,10 @@ var Ball = function() {
             x = Math.random() * cw;
             y = Math.random() * ch;    
             ball.center = mod_canvas([x, y]);
-            if (ball.center[0] < R) {ball.center[0] += R;}
-            if (ball.center[1] < R) {ball.center[1] += R;}
-            if (ball.center[0] > cw - R) { ball.center[0] += R; }
-            if (ball.center[1] > ch - R) { ball.center[0] += R; }
+			if (ball.center[0] <= R + h) {ball.center[0] += R;}
+            if (ball.center[1] <= R + h) {ball.center[1] += R;}
+            if (ball.center[0] >= cw - R) { ball.center[0] -= R; }
+            if (ball.center[1] >= ch - R) { ball.center[0] -= R; }
             for (i = 0; i < cells.length; i++){
                 if (ball.hit(cells[i])) { 
                     ball_ok = false; 
@@ -272,19 +306,20 @@ var Ball = function() {
 
 };
 
-// Wall declarations, wall will be the only object responsible to keep 
-// track of the level of the game (this is good, because this is the only
-// which is level sensitive)
+// wall will be the only object responsible to keep 
+// track of the level of the game 
 
 Wall = function(){
    
-   	this.marg = 3;
-   	// the one cell is a dummy cell for the 0th wall which in turn is 
+   	// this scalar determines the margin between any newly created wall
+   	// and the wall it's created upon it
+   	this.marg = 4;
+   	
+   	// the first cell is a dummy cell for the 0th wall which in turn is 
    	// a dummy wall for the first level of the game  
     this.cells = [new Cell()];
-    // which constiute the ith wall
-    // wall[0] is initialized to contains zero cells and should not be
-    // touched
+
+    // wall[0] is initialized to contain zero cells
     this.walls = [[0, 0]]; 
     
     // pushes a cell with coordinate o and direction u to jth wall
@@ -304,11 +339,11 @@ Wall = function(){
     
     this.good_cell = function(cell){
     	var l = this.cells.length;
-        if (cell.crash(this.cells.slice(1, l - 1))){return false;}
+        if (cell.strict_crash(this.cells.slice(1, l - 1))){return false;}
         var o = cell.o;
         if (o[0] > canvas.width - this.marg * w || o[0] < this.marg * w ||
             o[1] > canvas.height - this.marg * w || o[1] < this.marg * w ) {return false;}
-	    else {return true;}
+        else {return true;}
     };
 
 	// returns center for initializing  wall orthogonal to jth wall 
@@ -356,7 +391,7 @@ Wall = function(){
 
     this.Draw = function(){
     	for (var i = 1; i < this.cells.length; i ++){ 
-    		this.cells[i].Draw("blue");
+            this.cells[i].Draw("blue");
     	} 
     };
     
@@ -411,6 +446,14 @@ function norm(a){return dot(a, a);}
 function dist(a, b){return norm(sum(a, scalar(-1, b)));}
 
 
+// unicode of relevant keys color  
+up_key = 38; 
+down_key = 40;
+right_key = 39;
+left_key = 37;
+enter_key = 13;
+space_key = 32;
+
 // events 
 function user_event_handler (event){
     var x = event.which || event.keycode;
@@ -431,28 +474,37 @@ function gamehandler(){
 } 
 
 function snake_handler(){
-    var was_feed = snake.Shift(ball, snake.d),
-    	sc = 3,
-    	t = 3;
+    var was_feed = snake.Shift(ball, snake.d);
     if (was_feed && game_on) {
         clearInterval(Snakehandler);
         ball = ball._new(snake, wall);
-        stime = stime - t;
         gamehandler();
     }
-    if (snake.crash() || snake.crash(wall.cells.slice(1))){ 
-        alert("Congratulations! You scored: " + snake.cells.length);
+    if (snake.cells.length  === snake_l){
+        clearInterval(Snakehandler);
+        score += snake_l;
+        snake_l += sc;
+        stime = stime - stime_shift;
+        snake = snake.Reset();
+        wall.add();
+        ball = ball._new(snake, wall);
+        wall.Draw();
+        gamehandler();
+    }
+    if (snake.crash() || snake.strict_crash(wall.cells.slice(1))){
+    	score = score + snake.cells.length;
+        alert("Congratulations! You scored: " + score); 
         clearInterval(Snakehandler); 
     }
-    if (snake.cells.length % sc === 0){
-        clearInterval(Snakehandler);
-        wall.add();
-        wall.Draw();
-        stime = stime - t * (sc - 1);
-        snake = snake.Reset();
-        gamehandler();
-    }
 }
+
+// global state variables of game_handler
+
+stime = 300;
+snake_l = 3;
+score = 0;
+sc = 2;
+stime_shift = 5;
 
 // start
 var snake = new Snake();
