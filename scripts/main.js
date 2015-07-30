@@ -180,15 +180,15 @@ var Snake = function(){
 
     this.erase = function(){
         for (var i = 0; i < this.cells.length; i ++){
-        	this.cells[i].Draw(backgroundcolor);
+            this.cells[i].Draw(backgroundcolor);
         }
     };
 
-	this.Reset = function(wall){
+    this.Reset = function(wall){
 	    this.erase();
 	    var snake = new Snake();
         return snake;
-	}
+	};
 };
 
 /*
@@ -290,15 +290,15 @@ Wall = function(){
     // pushes a cell with coordinate o and direction u to jth wall
     this.push_cell_to_wall = function(cell, j){
         if (j > 0) {
-			if (this.walls[j] === undefined){
-				var b = this.walls[j - 1][1] + 1;
-				this.walls[j] = [b, b];
-				this.cells.push(cell);
-			}
-			else {
-				this.walls[j][1] ++; 
-				this.cells.push(cell);
-			}
+		    if (this.walls[j] === undefined){
+			    var b = this.walls[j - 1][1] + 1;
+			    this.walls[j] = [b, b];
+			    this.cells.push(cell);
+		    }
+		    else {
+	            this.walls[j][1] ++; 
+	            this.cells.push(cell);
+		    }
 	    }
     };
     
@@ -308,20 +308,20 @@ Wall = function(){
         var o = cell.o;
         if (o[0] > canvas.width - this.marg * w || o[0] < this.marg * w ||
             o[1] > canvas.height - this.marg * w || o[1] < this.marg * w ) {return false;}
-		else {return true;}
+	    else {return true;}
     };
 
 	// returns center for initializing  wall orthogonal to jth wall 
-	this.first_cell = function(j){
-	    var i0 = this.walls[j][0],
-		    i1 = this.walls[j][1],
-		    u = this.cells[i0].u,
-		    Tu = TT(u),
-		    i = Math.floor((i0 + i1) / 2), 
-		    d = Math.floor(Math.random() * 2) ? -1:1,
-		    o = mod_canvas(sum(this.cells[i].o, scalar(this.marg * d * w, Tu)));
-		    cell = new Cell(o[0], o[1], Tu[0], Tu[1]);
-		return [cell, d];    
+    this.first_cell = function(j){
+        var i0 = this.walls[j][0],
+            i1 = this.walls[j][1],
+            u = this.cells[i0].u,
+            Tu = TT(u),
+            i = Math.floor((i0 + i1) / 2), 
+            d = Math.floor(Math.random() * 2) ? -1:1,
+            o = mod_canvas(sum(this.cells[i].o, scalar(this.marg * d * w, Tu)));
+	        cell = new Cell(o[0], o[1], Tu[0], Tu[1]);
+         return [cell, d];    
 	}
 
     this.add = function(){
@@ -330,18 +330,18 @@ Wall = function(){
             while(true){
                 var j = Math.floor(Math.random() * l) ;
                 if (j === 0 || j === -1 || j === l ){ j = l - 1;}
-           	    var f_c = this.first_cell(j),
-           	    	cell = f_c[0],
-           	    	d = f_c[1];		        
+                var f_c = this.first_cell(j),
+           	        cell = f_c[0],
+           	        d = f_c[1];		        
                 if (this.good_cell(cell)) {break;}
-			}
+            }
             while (this.good_cell(cell)){
                 this.push_cell_to_wall(cell, l);
                 var c = sum(cell.o, scalar(2 * d * w, cell.u));
                 cell = new Cell(c[0], c[1], cell.u[0], cell.u[1]);
             } 
-		}
-		else if (l === 1) {
+        }
+        else if (l === 1) {
             var o = mod_canvas([this.marg * w, Math.floor(canvas.height / 2)]),
                 u = [1, 0],
                 d = 1,
@@ -351,7 +351,7 @@ Wall = function(){
                 o = sum(o, scalar(2 * d * w, u));
                 cell = new Cell(o[0], o[1], u[0], u[1]);
             } 
-		}
+	    }
     };
 
     this.Draw = function(){
