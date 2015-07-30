@@ -120,6 +120,7 @@ Cell = function (x = 6 * w, y = w, u0 = 0, u1 = 1){
         }   
         return false;
     };    
+    
     this.strict_crash = function(wall){
         var o = this.o,
             u = this.u,
@@ -218,8 +219,8 @@ var Snake = function(){
     };
 
     this.Reset = function(wall){
-	    this.erase();
-	    var snake = new Snake();
+        this.erase();
+        var snake = new Snake();
         return snake;
 	};
 };
@@ -281,10 +282,10 @@ var Ball = function() {
             x = Math.random() * cw;
             y = Math.random() * ch;    
             ball.center = mod_canvas([x, y]);
-			if (ball.center[0] <= R + h) {ball.center[0] += R;}
-            if (ball.center[1] <= R + h) {ball.center[1] += R;}
-            if (ball.center[0] >= cw - R) { ball.center[0] -= R; }
-            if (ball.center[1] >= ch - R) { ball.center[0] -= R; }
+            if (ball.center[0] <= R + h) {ball.center[0] += (R + h);}
+            if (ball.center[1] <= R + h) {ball.center[1] += (R + h);}
+            if (ball.center[0] >= cw - R - h) {ball.center[0] -= (R + h);}
+            if (ball.center[1] >= ch - R - h) {ball.center[0] -= (R + h);}
             for (i = 0; i < cells.length; i++){
                 if (ball.hit(cells[i])) { 
                     ball_ok = false; 
@@ -330,7 +331,7 @@ Wall = function(){
                 this.walls[j] = [b, b];
                 this.cells.push(cell);
             }
-		    else {
+            else {
                 this.walls[j][1] ++; 
                 this.cells.push(cell);
             }
@@ -461,10 +462,7 @@ function user_event_handler (event){
     else if (x === down_key) {snake.d = [0, 1];}
     else if (x === right_key) {snake.d = [1, 0];}
     else if (x === left_key) {snake.d = [-1, 0];}
-    else if (x === space_key) {
-        stop_game = true; // this is for debugg
-        clearInterval(Snakehandler);
-    }
+    //else if (x === space_key) {stop_game = true; // this is for debugg clearInterval(Snakehandler);}
 }
 window.addEventListener("keydown", user_event_handler);
 
@@ -503,7 +501,7 @@ function snake_handler(){
 stime = 300;
 snake_l = 3;
 score = 0;
-sc = 2;
+sc = 3;
 stime_shift = 5;
 
 // start
