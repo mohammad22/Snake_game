@@ -4,10 +4,6 @@ canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 // half-height and half-width  of each cell  (be it a Snake or a wall cell)
-// probably this is bad design to hardcode this throughout the code
-// may be later I should move them as cell properties
-// but for now as far as I see all the cells will remain fixed size
-// and this is  very convenient  
 h = 6; 
 w = 2 * h; 
 
@@ -16,9 +12,6 @@ w = 2 * h;
 backgroundcolor = "white"; 
 
 
-stop_game = false;
-game_on = true;
-Snakehandler = function(){}; // global varibale to handle Snake state and movement 
 
 // Dynamic canvas adjustment 
 canvas.width  = (Math.floor(this.innerWidth / (4 * h))  - 2)  * 4 * h;
@@ -77,7 +70,8 @@ Cell = function (x = 6 * w, y = w, u0 = 0, u1 = 1){
         else 
             {return false;}
     };
-    
+   
+    // returns true if p is in_on or on the boundary of the cell
     this.is_on = function (p, ww = w, hh = h){
         var o = this.o,
             u = this.u,
@@ -165,7 +159,7 @@ var Snake = function(){
     To locate the center of a shifted cell we need the coodinates of the
     * original cell (its center & direction) and the direction of shift m 
     * also we need ball object to decide the type of shift 
-    * Shifi: returns the boolean value was_feed indicating if Snake hit 
+    * Shift: returns the boolean value was_feed indicating if Snake hit 
     * the ball or not.*/
     
     this.Shift = function (ball, m = this.cells[0].u){
@@ -466,7 +460,13 @@ function user_event_handler (event){
     else if (x === left_key) {snake.d = [-1, 0];}
     //else if (x === space_key) {stop_game = true; // this is for debugg clearInterval(Snakehandler);}
 }
+
 window.addEventListener("keydown", user_event_handler);
+
+// for debug
+stop_game = false;
+
+Snakehandler = function(){}; // global varibale to handle Snake state and movement 
 
 // The main entrance function 
 function gamehandler(){
@@ -475,7 +475,7 @@ function gamehandler(){
 
 function snake_handler(){
     var was_feed = snake.Shift(ball, snake.d);
-    if (was_feed && game_on) {
+    if (was_feed) {
         clearInterval(Snakehandler);
         ball = ball._new(snake, wall);
         gamehandler();
