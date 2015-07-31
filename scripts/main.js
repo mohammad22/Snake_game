@@ -33,8 +33,8 @@ canvas.height = (Math.floor(this.innerHeight / (4 * h)) - 2)  * 4 * h;
  * Every Snake (Wall) is a collection of cells.
 */
 Cell = function (x = 6 * w, y = w, u0 = 0, u1 = 1){
-	
-	
+    
+    
     this.o = [x, y];
     
     this.u = [u0, u1];
@@ -63,7 +63,7 @@ Cell = function (x = 6 * w, y = w, u0 = 0, u1 = 1){
         ctx.beginPath();
         ctx.fillRect(x[0], x[1], ww[0], ww[1]);
     };
-	
+    
     // returns true if p is an interior point of the cell; 
     // otherwise returns false; ww: the width, hh: the height of cell
     
@@ -160,7 +160,7 @@ var Snake = function(){
     this.cells = [new Cell()]; 
     
     this.d = [1, 0];      
-	
+    
     /* 
     To locate the center of a shifted cell we need the coodinates of the
     * original cell (its center & direction) and the direction of shift m 
@@ -186,7 +186,7 @@ var Snake = function(){
         if (was_feed === false) {
             this.cells[l - 1].Draw(backgroundcolor);
             if (l >= 1 && 
-            	dot(this.cells[l - 1].u, this.cells[l - 2].u) === 0) {
+                dot(this.cells[l - 1].u, this.cells[l - 2].u) === 0) {
                 this.cells[l - 2].Draw();
             }
             this.cells.pop(); 
@@ -222,7 +222,7 @@ var Snake = function(){
         this.erase();
         var snake = new Snake();
         return snake;
-	};
+    };
 };
 
 /*
@@ -233,7 +233,7 @@ var Ball = function() {
     this.center = mod_canvas([40 * h, 10 * w]);
     
     this.radius = h;        
-	
+    
     // This function is based on the fact that: a circle has nonempty 
     // intersection  with a rectangle if the center of circle is inside the
     // rectangle obtained by growing width and height of the original 
@@ -260,7 +260,7 @@ var Ball = function() {
             gradient.addColorStop("1.0", "yellow");
             ctx.fillStyle = gradient; 
         }
-        else { ctx.fillStyle = color; }
+        else {ctx.fillStyle = color;}
         ctx.strokeStyle = "white";
         ctx.beginPath();
         ctx.arc(cc[0], cc[1], R, 0, 2 * Math.PI);
@@ -312,12 +312,12 @@ var Ball = function() {
 
 Wall = function(){
    
-   	// this scalar determines the margin between any newly created wall
-   	// and the wall it's created upon it
-   	this.marg = 4;
-   	
-   	// the first cell is a dummy cell for the 0th wall which in turn is 
-   	// a dummy wall for the first level of the game  
+    // this scalar determines the margin between any newly created wall
+    // and the wall it's created upon it
+    this.marg = 4;
+    
+    // the first cell is a dummy cell for the 0th wall which in turn is 
+    // a dummy wall for the first level of the game  
     this.cells = [new Cell()];
 
     // wall[0] is initialized to contain zero cells
@@ -339,7 +339,7 @@ Wall = function(){
     };
     
     this.good_cell = function(cell){
-    	var l = this.cells.length;
+        var l = this.cells.length;
         if (cell.strict_crash(this.cells.slice(1, l - 1))){return false;}
         var o = cell.o;
         if (o[0] > canvas.width - this.marg * w || o[0] < this.marg * w ||
@@ -347,7 +347,9 @@ Wall = function(){
         else {return true;}
     };
 
-	// returns center for initializing  wall orthogonal to jth wall 
+    // returns center cell for initializing  wall orthogonal to jth wall 
+    // and an integer d which indicates in which direction we should expand 
+    // the wall  (direction: d * cell.u) 
     this.first_cell = function(j){
         var i0 = this.walls[j][0],
             i1 = this.walls[j][1],
@@ -356,19 +358,19 @@ Wall = function(){
             i = Math.floor((i0 + i1) / 2), 
             d = Math.floor(Math.random() * 2) ? -1:1,
             o = mod_canvas(sum(this.cells[i].o, scalar(this.marg * d * w, Tu)));
-	        cell = new Cell(o[0], o[1], Tu[0], Tu[1]);
-         return [cell, d];    
-	}
+            cell = new Cell(o[0], o[1], Tu[0], Tu[1]);
+        return [cell, d];    
+    }
 
     this.add = function(){
-    	var l = this.walls.length;
-    	if (l > 1) {
+        var l = this.walls.length;
+        if (l > 1) {
             while(true){
                 var j = Math.floor(Math.random() * l) ;
-                if (j === 0 || j === -1 || j === l ){ j = l - 1;}
+                if (j === 0 || j === -1 || j === l ){j = l - 1;}
                 var f_c = this.first_cell(j),
                     cell = f_c[0],
-                    d = f_c[1];		        
+                    d = f_c[1];             
                 if (this.good_cell(cell)) {break;}
             }
             while (this.good_cell(cell)){
@@ -391,9 +393,9 @@ Wall = function(){
     };
 
     this.Draw = function(){
-    	for (var i = 1; i < this.cells.length; i ++){ 
+        for (var i = 1; i < this.cells.length; i ++){ 
             this.cells[i].Draw("blue");
-    	} 
+        } 
     };
     
 };
@@ -490,13 +492,13 @@ function snake_handler(){
         gamehandler();
     }
     if (snake.crash() || snake.strict_crash(wall.cells.slice(1))){
-    	score = score + snake.cells.length;
+        score = score + snake.cells.length;
         alert("Congratulations! You scored: " + score); 
         clearInterval(Snakehandler); 
     }
 }
 
-// global state variables of game_handler
+// global state variables of snake_handler
 
 stime = 300;
 snake_l = 3;
