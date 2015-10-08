@@ -466,7 +466,7 @@ window.addEventListener("keydown", user_event_handler);
 // for debug
 stop_game = false;
 
-Snakehandler = function(){}; // global varibale to handle Snake state and movement 
+Snakehandler = 0; // global varibale to handle Snake state and movement 
 
 // The main entrance function 
 function gamehandler(){
